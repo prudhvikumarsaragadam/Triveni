@@ -112,6 +112,76 @@
 				"add",
 				"."
 			]
+		},
+		{
+			"label": "Git Commit",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"commit",
+				"-m",
+				"Add dynamic image upload feature for orders"
+			]
+		},
+		{
+			"label": "Git Push",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"push",
+				"origin",
+				"main"
+			]
+		},
+		{
+			"label": "Check Git Branches",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"branch",
+				"-a"
+			]
+		},
+		{
+			"label": "Set Remote URL",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"remote",
+				"set-url",
+				"origin",
+				"https://github.com/prudhvikumarsaragadam/Triveni-.git"
+			]
+		},
+		{
+			"label": "Check Remote Repository",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"ls-remote",
+				"https://github.com/prudhvikumarsaragadam/Triveni-.git"
+			]
+		},
+		{
+			"label": "Git Push Verbose",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"push",
+				"-v",
+				"origin",
+				"main"
+			]
+		},
+		{
+			"label": "Check Git Log",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"log",
+				"--oneline",
+				"-5"
+			]
 		}
 	]
 }
