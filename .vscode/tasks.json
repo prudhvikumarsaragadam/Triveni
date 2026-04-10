@@ -1,0 +1,96 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backend: Start Server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["start"],
+      "cwd": "${workspaceFolder}/backend",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*Server is running.*$",
+          "endsPattern": "^.*$"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "server"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "Frontend: Start (Python Server)",
+      "type": "shell",
+      "command": "python3 -m http.server 3000",
+      "cwd": "${workspaceFolder}/frontend",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*Serving HTTP.*$",
+          "endsPattern": "^.*$"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "server"
+      }
+    },
+    {
+      "label": "Backend: Install Dependencies",
+      "type": "shell",
+      "command": "npm",
+      "args": ["install"],
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "label": "Backend: Dev Mode (Auto-reload)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "cwd": "${workspaceFolder}/backend",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*listening.*$",
+          "endsPattern": "^.*$"
+        }
+      }
+    },
+    {
+      "label": "Run All (Backend + Frontend)",
+      "dependsOn": [
+        "Backend: Start Server",
+        "Frontend: Start (Python Server)"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}

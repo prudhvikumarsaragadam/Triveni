@@ -1,0 +1,13 @@
+{
+  "name": "boutique-management-frontend",
+  "version": "1.0.0",
+  "description": "Boutique Management System - Frontend",
+  "main": "index.html",
+  "scripts": {
+    "start": "node serve.js",
+    "dev": "node serve.js"
+  },
+  "keywords": ["boutique", "management", "orders"],
+  "author": "",
+  "license": "ISC"
+}
