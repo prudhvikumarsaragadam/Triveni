@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // Create a new order
 router.post('/', (req, res) => {
-  const { customer_id, delivery_date, cutting_deadline, model_design, cost, notes } = req.body;
+  const { customer_id, delivery_date, cutting_deadline, model_design, cost, notes, measurements } = req.body;
 
   if (!customer_id || !delivery_date) {
     return res.status(400).json({ error: 'customer_id and delivery_date are required' });
@@ -18,7 +18,8 @@ router.post('/', (req, res) => {
     cutting_deadline: cutting_deadline || null,
     model_design: model_design || '',
     cost: cost || 0,
-    notes: notes || ''
+    notes: notes || '',
+    measurements: measurements || null
   }, (err, orderId) => {
     if (err) {
       return res.status(500).json({ error: err.message });

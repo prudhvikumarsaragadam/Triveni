@@ -108,10 +108,21 @@
         </div>
 
         <div class="form-row">
+          <div class="form-field">
+            <label>Measurement Category</label>
+            <select id="measurementType">
+              <option value="">Select measurement group</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="measurementFields" class="measurement-grid"></div>
+
+        <div class="form-row">
           <div class="form-field full-width">
             <label>Upload Photos</label>
-            <input type="file" id="orderPhotos" multiple accept="image/*" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-            <small style="color: #64748b; font-size: 0.9em;">Select multiple images (max 10 files, 5MB each)</small>
+            <input type="file" id="orderPhotos" multiple accept="image/*" title="Hold Ctrl (Windows) or Cmd (Mac) to select multiple files" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+            <small style="color: #64748b; font-size: 0.9em;">Select multiple images (hold Ctrl/Cmd to multi-select). Max 10 files, 5MB each.</small>
             <div id="photoPreview" class="photo-preview" style="margin-top: 10px;"></div>
           </div>
         </div>

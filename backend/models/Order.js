@@ -4,12 +4,12 @@ const db = require('../database/db');
 class Order {
   static create(customerData, callback) {
     const id = uuidv4();
-    const { customer_id, delivery_date, cutting_deadline, model_design, cost, notes } = customerData;
+    const { customer_id, delivery_date, cutting_deadline, model_design, cost, notes, measurements } = customerData;
     
-    const query = `INSERT INTO orders (id, customer_id, delivery_date, cutting_deadline, model_design, cost, notes)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    const query = `INSERT INTO orders (id, customer_id, delivery_date, cutting_deadline, model_design, cost, notes, measurements)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
     
-    db.run(query, [id, customer_id, delivery_date, cutting_deadline, model_design, cost, notes], function(err) {
+    db.run(query, [id, customer_id, delivery_date, cutting_deadline, model_design, cost, notes, measurements ? JSON.stringify(measurements) : null], function(err) {
       if (err) callback(err);
       else callback(null, id);
     });
@@ -29,7 +29,8 @@ class Order {
         // Parse photos string into array
         const orders = rows.map(order => ({
           ...order,
-          photos: order.photos ? order.photos.split('|') : []
+          photos: order.photos ? order.photos.split('|') : [],
+          measurements: order.measurements ? JSON.parse(order.measurements) : null
         }));
         callback(null, orders);
       }
@@ -49,6 +50,7 @@ class Order {
       else if (!row) callback(null, null);
       else {
         row.photos = row.photos ? row.photos.split('|') : [];
+        row.measurements = row.measurements ? JSON.parse(row.measurements) : null;
         callback(null, row);
       }
     });

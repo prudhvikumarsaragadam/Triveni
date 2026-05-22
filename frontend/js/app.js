@@ -6,6 +6,52 @@ let appState = {
   currentTab: 'dashboard'
 };
 
+const measurementGroups = {
+  'Blouse Measurements': [
+    { label: 'Length', key: 'blouse_length', min: 6, max: 25 },
+    { label: 'Shoulder', key: 'blouse_shoulder', min: 8, max: 22 },
+    { label: 'Chest Upper', key: 'blouse_chest_upper', min: 18, max: 50 },
+    { label: 'Middle Chest', key: 'blouse_middle_chest', min: 18, max: 50 },
+    { label: 'Waist', key: 'blouse_waist', min: 18, max: 50 },
+    { label: 'Hand Length', key: 'blouse_hand_length', min: 1, max: 25 },
+    { label: 'Hand Loose', key: 'blouse_hand_loose', min: 6, max: 20 },
+    { label: 'Arm Hole', key: 'blouse_arm_hole', min: 7, max: 24 },
+    { label: 'Front Neck Deep', key: 'blouse_front_neck_deep', min: 2, max: 10 },
+    { label: 'Back Neck Deep', key: 'blouse_back_neck_deep', min: 2, max: 13 },
+    { label: 'Chest Points', key: 'blouse_chest_points', min: 8, max: 20 },
+    { label: 'Collar', key: 'blouse_collar', min: 10, max: 25 }
+  ],
+  'Dress / Top / Frock Measurements': [
+    { label: 'Length', key: 'dress_length', min: 10, max: 50 },
+    { label: 'Shoulder', key: 'dress_shoulder', min: 8, max: 22 },
+    { label: 'Chest Upper', key: 'dress_chest_upper', min: 18, max: 50 },
+    { label: 'Middle Chest', key: 'dress_middle_chest', min: 18, max: 50 },
+    { label: 'Waist', key: 'dress_waist', min: 18, max: 50 },
+    { label: 'Hip', key: 'dress_hip', min: 18, max: 60 },
+    { label: 'Slit', key: 'dress_slit', min: 1, max: 30 },
+    { label: 'Hand Length', key: 'dress_hand_length', min: 1, max: 25 },
+    { label: 'Hand Loose', key: 'dress_hand_loose', min: 6, max: 20 },
+    { label: 'Arm Hole', key: 'dress_arm_hole', min: 7, max: 24 },
+    { label: 'Front Neck Deep', key: 'dress_front_neck_deep', min: 2, max: 10 },
+    { label: 'Back Neck Deep', key: 'dress_back_neck_deep', min: 2, max: 13 },
+    { label: 'Collar', key: 'dress_collar', min: 10, max: 25 }
+  ],
+  'Lehenga / Skirt / Pant Measurements': [
+    { label: 'Length', key: 'lehenga_length', min: 10, max: 50 },
+    { label: 'Waist', key: 'lehenga_waist', min: 18, max: 50 },
+    { label: 'Hip', key: 'lehenga_hip', min: 18, max: 50 },
+    { label: 'Thigh / Tight', key: 'lehenga_thigh_tight', min: 18, max: 40 },
+    { label: 'Loose', key: 'lehenga_loose', min: 10, max: 30 }
+  ],
+  'Saree Pleating Measurements': [
+    { label: 'Pallu Length', key: 'saree_pallu_length', min: 38, max: 48 },
+    { label: 'Shoulder to Waist', key: 'saree_shoulder_to_waist', min: 35, max: 55 },
+    { label: 'Waist to Waist', key: 'saree_waist_to_waist', min: 30, max: 68 },
+    { label: 'Pallu Size', key: 'saree_pallu_size', min: 3, max: 18 },
+    { label: 'Chest Size', key: 'saree_chest_size', min: 9, max: 18 }
+  ]
+};
+
 // Tab Switching
 function switchTab(tab) {
   // Hide all tabs
@@ -59,6 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('bookingDate').value = today;
 
+  // Populate measurement types and fields
+  populateMeasurementTypeOptions();
+  document.getElementById('measurementType').addEventListener('change', () => {
+    renderMeasurementFields(document.getElementById('measurementType').value);
+  });
+
   // Setup form submission
   document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
 
@@ -92,29 +144,93 @@ function setupCustomerFilters() {
   }
 }
 
+function populateMeasurementTypeOptions() {
+  const measurementTypeSelect = document.getElementById('measurementType');
+  if (!measurementTypeSelect) return;
+
+  Object.keys(measurementGroups).forEach(groupName => {
+    const option = document.createElement('option');
+    option.value = groupName;
+    option.textContent = groupName;
+    measurementTypeSelect.appendChild(option);
+  });
+}
+
+function renderMeasurementFields(groupKey) {
+  const container = document.getElementById('measurementFields');
+  if (!container) return;
+
+  if (!groupKey || !measurementGroups[groupKey]) {
+    container.innerHTML = '<p style="color: #475569;">Select a measurement group to load fields.</p>';
+    return;
+  }
+
+  const fields = measurementGroups[groupKey];
+  container.innerHTML = fields.map(field => {
+    const options = Array.from({ length: field.max - field.min + 1 }, (_, index) => {
+      const value = field.min + index;
+      return `<option value="${value}">${value}</option>`;
+    }).join('');
+
+    return `
+      <div class="form-field">
+        <label>${field.label}</label>
+        <select id="${field.key}">
+          <option value="">Select ${field.label}</option>
+          ${options}
+        </select>
+      </div>
+    `;
+  }).join('');
+}
+
 // Setup photo upload preview
 function setupPhotoUpload() {
   const photoInput = document.getElementById('orderPhotos');
   const photoPreview = document.getElementById('photoPreview');
 
   photoInput.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
+    const rawFiles = Array.from(e.target.files || []);
     photoPreview.innerHTML = '';
 
-    files.forEach((file, index) => {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const previewItem = document.createElement('div');
-          previewItem.className = 'photo-preview-item';
-          previewItem.innerHTML = `
-            <img src="${e.target.result}" alt="Preview ${index + 1}">
-            <button type="button" class="remove-photo" onclick="removePhotoPreview(${index})">&times;</button>
-          `;
-          photoPreview.appendChild(previewItem);
-        };
-        reader.readAsDataURL(file);
-      }
+    // Client-side validation: max 10 files, each <= 5MB, images only
+    const validFiles = [];
+    rawFiles.forEach((file) => {
+      if (!file.type.startsWith('image/')) return;
+      if (file.size > 5 * 1024 * 1024) return;
+      validFiles.push(file);
+    });
+
+    if (rawFiles.length > 10) {
+      showMessage('You can upload a maximum of 10 images', 'error');
+    }
+
+    // If some files were invalid due to size/type, notify user
+    if (validFiles.length < rawFiles.length) {
+      showMessage('Some files were ignored (non-image or >5MB)', 'warning');
+    }
+
+    // Reflect validated files back to the input (so upload uses filtered set)
+    const dt = new DataTransfer();
+    validFiles.slice(0, 10).forEach(f => dt.items.add(f));
+    photoInput.files = dt.files;
+
+    validFiles.slice(0, 10).forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'photo-preview-item';
+        previewItem.innerHTML = `
+          <img src="${e.target.result}" alt="Preview ${index + 1}">
+          <div class="photo-meta">
+            <div class="photo-name">${file.name}</div>
+            <div class="photo-size">${(file.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <button type="button" class="remove-photo" onclick="removePhotoPreview(${index})">&times;</button>
+        `;
+        photoPreview.appendChild(previewItem);
+      };
+      reader.readAsDataURL(file);
     });
   });
 }
@@ -177,6 +293,20 @@ async function handleOrderSubmit(e) {
   const deliveryDate = document.getElementById('deliveryDate').value;
   const cuttingDeadline = document.getElementById('cuttingDeadline').value;
   const notes = document.getElementById('notes').value;
+  const measurementType = document.getElementById('measurementType').value;
+  const measurements = {
+    type: measurementType || null,
+    values: {}
+  };
+
+  if (measurementType && measurementGroups[measurementType]) {
+    measurementGroups[measurementType].forEach(field => {
+      const fieldElement = document.getElementById(field.key);
+      if (fieldElement && fieldElement.value) {
+        measurements.values[field.key] = fieldElement.value;
+      }
+    });
+  }
 
   if (!customerName || !customerPhone || !modelDesign || !cost || !deliveryDate) {
     showMessage('Please fill all required fields', 'error');
@@ -213,7 +343,8 @@ async function handleOrderSubmit(e) {
       cutting_deadline: cuttingDeadline || null,
       model_design: modelDesign,
       cost: cost,
-      notes: notes
+      notes: notes,
+      measurements: measurements
     });
 
     if (orderResponse.success) {
@@ -360,6 +491,12 @@ async function loadAllOrders() {
             <div class="detail-label">Cost</div>
             <div class="detail-value">₹${order.cost}</div>
           </div>
+          ${order.measurements && order.measurements.type ? `
+            <div class="detail-item">
+              <div class="detail-label">Measurement Group</div>
+              <div class="detail-value">${order.measurements.type}</div>
+            </div>
+          ` : ''}
         </div>
         ${photosHtml}
         <div class="timeline-steps">

@@ -1,10 +1,10 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'boutique.db');
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'boutique.db');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) console.error('Database connection error:', err);
-  else console.log('Connected to SQLite database');
+  else if (!process.env.JEST_WORKER_ID) console.log('Connected to SQLite database:', dbPath);
 });
 
 // Initialize database tables
@@ -31,10 +31,18 @@ const initializeDatabase = () => {
       model_design TEXT,
       cost REAL,
       notes TEXT,
+      measurements TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(customer_id) REFERENCES customers(id)
     )`);
+
+    // Ensure measurements column exists on older databases
+    db.run(`ALTER TABLE orders ADD COLUMN measurements TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column name')) {
+        console.error('Error adding measurements column:', err.message);
+      }
+    });
 
     // Bills table
     db.run(`CREATE TABLE IF NOT EXISTS bills (
