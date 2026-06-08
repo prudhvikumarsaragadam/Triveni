@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const Bill = require('../models/Bill');
-const { v4: uuidv4 } = require('uuid');
+const googleIntegration = require('../services/googleIntegration');
 
 // Create a new order
 router.post('/', (req, res) => {
@@ -35,7 +35,20 @@ router.post('/', (req, res) => {
       if (billErr) console.error('Bill creation error:', billErr);
     });
 
-    res.status(201).json({ success: true, orderId, billNumber });
+    Order.getById(orderId, async (orderErr, order) => {
+      let googleSync = { success: false, message: 'Google sync not attempted' };
+
+      if (!orderErr && order) {
+        try {
+          googleSync = await googleIntegration.syncOrderToSheet(order);
+        } catch (syncError) {
+          console.error('Google sync error:', syncError.message);
+          googleSync = { success: false, message: syncError.message };
+        }
+      }
+
+      res.status(201).json({ success: true, orderId, billNumber, googleSync });
+    });
   });
 });
 

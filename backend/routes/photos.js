@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const util = require('util');
 const Photo = require('../models/Photo');
+const Order = require('../models/Order');
+const googleIntegration = require('../services/googleIntegration');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -34,48 +37,68 @@ const upload = multer({
 });
 
 // Upload photos for an order
-router.post('/upload/:orderId', upload.array('photos', 10), (req, res) => {
+router.post('/upload/:orderId', upload.array('photos', 10), async (req, res) => {
   const orderId = req.params.orderId;
 
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ error: 'No files uploaded' });
   }
 
+  const createPhoto = util.promisify(Photo.create.bind(Photo));
   const uploadedPhotos = [];
-  let errorOccurred = false;
-  let processedCount = 0;
+  const driveLinks = [];
+  const driveErrors = [];
 
-  // Save each photo to database
-  req.files.forEach(file => {
-    const filePath = `/uploads/${file.filename}`;
-
-    Photo.create(orderId, filePath, (err, photoId) => {
-      processedCount += 1;
-
-      if (err) {
-        console.error('Error saving photo:', err);
-        if (!errorOccurred) {
-          errorOccurred = true;
-          return res.status(500).json({ error: 'Error saving photo' });
-        }
-        return;
-      }
-
+  try {
+    for (const file of req.files) {
+      const filePath = `/uploads/${file.filename}`;
+      const photoId = await createPhoto(orderId, filePath);
       uploadedPhotos.push({
         id: photoId,
         file_path: filePath,
         uploaded_at: new Date()
       });
 
-      if (!errorOccurred && processedCount === req.files.length) {
-        res.status(201).json({
-          success: true,
-          message: `${uploadedPhotos.length} photo(s) uploaded successfully`,
-          photos: uploadedPhotos
-        });
+      try {
+        const localFilePath = path.join(__dirname, '../uploads', file.filename);
+        const uploadedFile = await googleIntegration.uploadFileToDrive(localFilePath, file.originalname, file.mimetype);
+        driveLinks.push(uploadedFile.webViewLink || uploadedFile.webContentLink);
+      } catch (driveError) {
+        console.error('Google Drive upload error:', driveError.message);
+        driveErrors.push(driveError.message);
       }
+    }
+
+    Order.getById(orderId, async (orderErr, order) => {
+      let googleSync = null;
+
+      if (!orderErr && order && driveLinks.length > 0) {
+        try {
+          googleSync = await googleIntegration.syncOrderToSheet(order, driveLinks);
+        } catch (syncError) {
+          console.error('Google sheet update error:', syncError.message);
+          googleSync = { success: false, message: syncError.message };
+        }
+      }
+
+      const responsePayload = {
+        success: true,
+        message: `${uploadedPhotos.length} photo(s) uploaded successfully`,
+        photos: uploadedPhotos,
+        driveLinks,
+        googleSync
+      };
+
+      if (driveErrors.length > 0) {
+        responsePayload.driveErrors = driveErrors;
+      }
+
+      res.status(201).json(responsePayload);
     });
-  });
+  } catch (err) {
+    console.error('Error saving photo:', err);
+    res.status(500).json({ error: 'Error processing photo upload', details: err.message });
+  }
 });
 
 // Get photos for an order
