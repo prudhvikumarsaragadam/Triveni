@@ -16,7 +16,7 @@ class Order {
   }
 
   static getAll(callback) {
-    const query = `SELECT o.*, c.name, c.phone, c.email,
+    const query = `SELECT o.*, c.name, c.phone, c.email, c.address,
                    GROUP_CONCAT(p.file_path, '|') as photos
                    FROM orders o
                    JOIN customers c ON o.customer_id = c.id
@@ -38,7 +38,7 @@ class Order {
   }
 
   static getById(id, callback) {
-    const query = `SELECT o.*, c.name, c.phone, c.email,
+    const query = `SELECT o.*, c.name, c.phone, c.email, c.address,
                    GROUP_CONCAT(p.file_path, '|') as photos
                    FROM orders o
                    JOIN customers c ON o.customer_id = c.id

@@ -3,14 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Boutique Management System</title>
+  <title>Triveni Fashion World</title>
   <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
   <div class="container">
     <header class="app-header">
-      <h1>🧥 Boutique Management System</h1>
-      <p>Track Orders, Manage Timeline & Quality</p>
+      <div class="brand-logo">
+        <img src="images/logo.png" alt="Triveni Fashion World logo">
+      </div>
+      <div class="brand-details">
+        <h1>Triveni Fashion World</h1>
+        <p>Track Orders, Manage Timeline & Quality</p>
+      </div>
     </header>
 
     <nav class="navigation">
@@ -121,8 +126,12 @@
         <div class="form-row">
           <div class="form-field full-width">
             <label>Upload Photos</label>
-            <input type="file" id="orderPhotos" multiple accept="image/*" title="Hold Ctrl (Windows) or Cmd (Mac) to select multiple files" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-            <small style="color: #64748b; font-size: 0.9em;">Select multiple images (hold Ctrl/Cmd to multi-select). Max 10 files, 5MB each.</small>
+            <div id="photoDropzone" class="photo-dropzone">
+              <p class="dropzone-text">Drag & drop images here, or click to select files.</p>
+              <input type="file" id="orderPhotos" name="photos" multiple accept="image/*" title="Hold Ctrl (Windows) or Cmd (Mac) to select multiple files" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; width: 100%;">
+            </div>
+            <small style="color: #64748b; font-size: 0.9em; display: block; margin-top: 6px;">Select multiple images (hold Ctrl/Cmd to multi-select). Max 10 files, 5MB each.</small>
+            <div id="photoCount" class="photo-count"></div>
             <div id="photoPreview" class="photo-preview" style="margin-top: 10px;"></div>
           </div>
         </div>
@@ -186,7 +195,7 @@
   <div id="photoModal" class="modal" style="display: none;">
     <div class="modal-content">
       <span class="close-modal" onclick="closePhotoModal()">&times;</span>
-      <img id="modalPhoto" src="" alt="Photo" style="max-width: 100%; max-height: 80vh;">
+      <img id="modalPhoto" src="" alt="Photo">
     </div>
   </div>
 

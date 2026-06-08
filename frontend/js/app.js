@@ -185,87 +185,129 @@ function renderMeasurementFields(groupKey) {
 }
 
 // Setup photo upload preview
+function renderPhotoPreview(files) {
+  const photoPreview = document.getElementById('photoPreview');
+  photoPreview.innerHTML = '';
+
+  files.forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const previewItem = document.createElement('div');
+      previewItem.className = 'photo-preview-item';
+      previewItem.innerHTML = `
+        <div class="photo-preview-thumb">
+          <img src="${e.target.result}" alt="Preview ${index + 1}">
+        </div>
+        <div class="photo-meta">
+          <div class="photo-name">${file.name}</div>
+          <div class="photo-size">${(file.size / 1024).toFixed(1)} KB</div>
+        </div>
+        <button type="button" class="remove-photo" onclick="removePhotoPreview(${index})">&times;</button>
+      `;
+
+      const thumb = previewItem.querySelector('.photo-preview-thumb');
+      if (thumb) {
+        thumb.addEventListener('click', () => openPhotoModal(e.target.result));
+      }
+
+      photoPreview.appendChild(previewItem);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function updatePhotoCount(count) {
+  const photoCount = document.getElementById('photoCount');
+  if (photoCount) {
+    photoCount.textContent = count ? `${count} image(s) selected` : '';
+  }
+}
+
+function handlePhotoFiles(rawFiles) {
+  const photoInput = document.getElementById('orderPhotos');
+  const validFiles = [];
+
+  rawFiles.forEach((file) => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) return;
+    validFiles.push(file);
+  });
+
+  if (rawFiles.length > 10) {
+    showMessage('You can upload a maximum of 10 images', 'error');
+  }
+
+  if (validFiles.length < rawFiles.length) {
+    showMessage('Some files were ignored (non-image or >5MB)', 'warning');
+  }
+
+  const dt = new DataTransfer();
+  validFiles.slice(0, 10).forEach((f) => dt.items.add(f));
+  photoInput.files = dt.files;
+
+  const selectedFiles = Array.from(photoInput.files);
+  updatePhotoCount(selectedFiles.length);
+  renderPhotoPreview(selectedFiles);
+}
+
 function setupPhotoUpload() {
   const photoInput = document.getElementById('orderPhotos');
-  const photoPreview = document.getElementById('photoPreview');
+  const dropzone = document.getElementById('photoDropzone');
 
   photoInput.addEventListener('change', (e) => {
-    const rawFiles = Array.from(e.target.files || []);
-    photoPreview.innerHTML = '';
-
-    // Client-side validation: max 10 files, each <= 5MB, images only
-    const validFiles = [];
-    rawFiles.forEach((file) => {
-      if (!file.type.startsWith('image/')) return;
-      if (file.size > 5 * 1024 * 1024) return;
-      validFiles.push(file);
-    });
-
-    if (rawFiles.length > 10) {
-      showMessage('You can upload a maximum of 10 images', 'error');
-    }
-
-    // If some files were invalid due to size/type, notify user
-    if (validFiles.length < rawFiles.length) {
-      showMessage('Some files were ignored (non-image or >5MB)', 'warning');
-    }
-
-    // Reflect validated files back to the input (so upload uses filtered set)
-    const dt = new DataTransfer();
-    validFiles.slice(0, 10).forEach(f => dt.items.add(f));
-    photoInput.files = dt.files;
-
-    validFiles.slice(0, 10).forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const previewItem = document.createElement('div');
-        previewItem.className = 'photo-preview-item';
-        previewItem.innerHTML = `
-          <img src="${e.target.result}" alt="Preview ${index + 1}">
-          <div class="photo-meta">
-            <div class="photo-name">${file.name}</div>
-            <div class="photo-size">${(file.size / 1024).toFixed(1)} KB</div>
-          </div>
-          <button type="button" class="remove-photo" onclick="removePhotoPreview(${index})">&times;</button>
-        `;
-        photoPreview.appendChild(previewItem);
-      };
-      reader.readAsDataURL(file);
-    });
+    handlePhotoFiles(Array.from(e.target.files || []));
   });
+
+  if (dropzone) {
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('drag-over');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('drag-over');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      handlePhotoFiles(Array.from(e.dataTransfer.files || []));
+    });
+  }
 }
 
 // Remove photo from preview
 function removePhotoPreview(index) {
   const photoInput = document.getElementById('orderPhotos');
-  const photoPreview = document.getElementById('photoPreview');
-
-  // Remove from preview
-  const previewItems = photoPreview.querySelectorAll('.photo-preview-item');
-  if (previewItems[index]) {
-    previewItems[index].remove();
-  }
-
-  // Remove from file input
-  const dt = new DataTransfer();
   const files = Array.from(photoInput.files);
   files.splice(index, 1);
-  files.forEach(file => dt.items.add(file));
+
+  const dt = new DataTransfer();
+  files.forEach((file) => dt.items.add(file));
   photoInput.files = dt.files;
+
+  updatePhotoCount(files.length);
+  renderPhotoPreview(files);
 }
 
 // Open photo modal
 function openPhotoModal(photoPath) {
   const modal = document.getElementById('photoModal');
   const modalPhoto = document.getElementById('modalPhoto');
-  modalPhoto.src = `http://localhost:5000${photoPath}`;
+  if (photoPath.startsWith('http') || photoPath.startsWith('data:')) {
+    modalPhoto.src = photoPath;
+  } else {
+    modalPhoto.src = `http://localhost:5000${photoPath}`;
+  }
   modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 }
 
 // Close photo modal
 function closePhotoModal() {
   const modal = document.getElementById('photoModal');
   modal.style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 // Close modal when clicking outside
@@ -500,24 +542,17 @@ async function loadAllOrders() {
         </div>
         ${photosHtml}
         <div class="timeline-steps">
-          <div class="timeline-step ${order.status === 'Booked' || ['Cutting', 'Stitching', 'QC', 'Ready', 'Delivered'].includes(order.status) ? 'completed' : 'pending'}">
-            <div class="timeline-label">Booked</div>
-          </div>
-          <div class="timeline-step ${order.status === 'Cutting' || ['Stitching', 'QC', 'Ready', 'Delivered'].includes(order.status) ? 'completed' : order.status === 'Booked' ? 'pending' : 'active'}">
-            <div class="timeline-label">Cutting</div>
-          </div>
-          <div class="timeline-step ${order.status === 'Stitching' || ['QC', 'Ready', 'Delivered'].includes(order.status) ? 'completed' : order.status === 'Booked' || order.status === 'Cutting' ? 'pending' : 'active'}">
-            <div class="timeline-label">Stitching</div>
-          </div>
-          <div class="timeline-step ${order.status === 'QC' || ['Ready', 'Delivered'].includes(order.status) ? 'completed' : order.status === 'Delivered' || order.status === 'Ready' ? 'active' : 'pending'}">
-            <div class="timeline-label">QC</div>
-          </div>
-          <div class="timeline-step ${order.status === 'Ready' || order.status === 'Delivered' ? 'completed' : 'pending'}">
-            <div class="timeline-label">Ready</div>
-          </div>
-          <div class="timeline-step ${order.status === 'Delivered' ? 'completed' : 'pending'}">
-            <div class="timeline-label">Delivered</div>
-          </div>
+          ${(() => {
+            const stageMap = { Booked: 'Booked', Cutting: 'Cutting', Stitching: 'QC', QC: 'QC', Ready: 'Ready', Delivered: 'Delivered' };
+            const stages = ['Booked', 'Cutting', 'QC', 'Ready', 'Delivered'];
+            const currentStage = stageMap[order.status] || 'Booked';
+            const currentIndex = stages.indexOf(currentStage);
+            return stages.map((stage, idx) => `
+              <div class="timeline-step ${idx < currentIndex ? 'completed' : idx === currentIndex ? 'active' : 'pending'}">
+                <div class="timeline-label">${stage}</div>
+              </div>
+            `).join('');
+          })()}
         </div>
         <div style="margin-top: 15px;">
           <select onchange="updateOrderStatus('${order.id}', this.value)" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc;">

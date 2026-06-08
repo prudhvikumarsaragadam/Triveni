@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" role="img" aria-labelledby="title">
+  <title>Triveni Fashion World Logo</title>
+  <defs>
+    <linearGradient id="goldA" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="goldB" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#fcd34d"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="34" ry="34" fill="#070707"/>
+  <circle cx="150" cy="150" r="110" fill="rgba(255,255,255,0.04)"/>
+  <path d="M54 150c0-54 44-98 98-98s98 44 98 98-44 98-98 98-98-44-98-98zm190 0c0-49-40-89-89-89s-89 40-89 89 40 89 89 89 89-40 89-89z" fill="url(#goldA)"/>
+  <path d="M118 88c22-16 48-14 73 0 12 7 18 18 18 30 0 16-10 37-28 46-18 9-45 12-63-2-11-9-18-26-18-42 0-14 6-24 18-32z" fill="url(#goldB)"/>
+  <path d="M142 88c12 0 22 8 24 20 1 8-4 18-10 24-8 8-22 8-30 0-6-6-9-16-7-24 2-12 12-20 23-20z" fill="#fff" opacity="0.85"/>
+  <path d="M132 124c8-4 20-4 28 0 8 4 8 10 8 16 0 16-12 26-24 26s-24-10-24-26c0-6 0-12 12-16z" fill="#fff" opacity="0.95"/>
+  <circle cx="150" cy="190" r="10" fill="url(#goldA)" opacity="0.9"/>
+</svg>
