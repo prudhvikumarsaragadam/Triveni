@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triveni Fashion World - Admin Login</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body class="login-page">
+  <div class="login-container">
+    <!-- Background Decoration -->
+    <div class="login-background-decoration"></div>
+    
+    <div class="login-wrapper">
+      <!-- Logo and Branding -->
+      <div class="login-branding">
+        <div class="login-logo">
+          <img src="images/logo.png" alt="Triveni Fashion World Logo">
+        </div>
+        <h1>Triveni Fashion World</h1>
+        <p>Admin Portal</p>
+      </div>
+
+      <!-- Login Form -->
+      <form class="login-form" id="loginForm">
+        <h2>Admin Login</h2>
+        
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            placeholder="Enter your username"
+            required
+            autocomplete="off"
+          >
+          <div class="input-icon">👤</div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="Enter your password"
+            required
+            autocomplete="off"
+          >
+          <div class="input-icon">🔒</div>
+        </div>
+
+        <div class="login-error" id="loginError"></div>
+
+        <button type="submit" class="login-btn">
+          <span>Sign In</span>
+          <span class="btn-loader" id="btnLoader" style="display: none;">⏳</span>
+        </button>
+
+        <div class="login-footer">
+          <p>Default Credentials: <strong>admin</strong> / <strong>Admin@123</strong></p>
+        </div>
+      </form>
+
+      <!-- Side Info Panel -->
+      <div class="login-info-panel">
+        <div class="info-content">
+          <h3>📊 Boutique Management System</h3>
+          <ul>
+            <li>✨ Track customer orders</li>
+            <li>📅 Manage timelines</li>
+            <li>💰 Handle billing</li>
+            <li>🎨 Quality control</li>
+            <li>📸 Photo uploads</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginError = document.getElementById('loginError');
+    const btnLoader = document.getElementById('btnLoader');
+
+    // Check if already logged in
+    if (localStorage.getItem('adminToken')) {
+      window.location.href = 'index.html';
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!username || !password) {
+        loginError.textContent = 'Please enter both username and password';
+        return;
+      }
+
+      // Show loader
+      btnLoader.style.display = 'inline';
+      loginForm.querySelector('.login-btn').disabled = true;
+      loginError.textContent = '';
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          // Store token and admin info
+          localStorage.setItem('adminToken', data.token);
+          localStorage.setItem('adminInfo', JSON.stringify(data.admin));
+          
+          // Redirect to dashboard
+          window.location.href = 'index.html';
+        } else {
+          loginError.textContent = data.error || 'Login failed. Please try again.';
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        loginError.textContent = 'Connection error. Please try again.';
+      } finally {
+        // Hide loader
+        btnLoader.style.display = 'none';
+        loginForm.querySelector('.login-btn').disabled = false;
+      }
+    });
+
+    // Allow Enter key to submit
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        loginForm.dispatchEvent(new Event('submit'));
+      }
+    });
+  </script>
+</body>
+</html>

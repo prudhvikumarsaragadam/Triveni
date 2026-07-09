@@ -6,6 +6,42 @@ let appState = {
   currentTab: 'dashboard'
 };
 
+// Authentication Check
+function checkAuthentication() {
+  const adminToken = localStorage.getItem('adminToken');
+  const adminInfo = localStorage.getItem('adminInfo');
+  
+  if (!adminToken || !adminInfo) {
+    // Redirect to login
+    window.location.href = 'login.html';
+    return false;
+  }
+
+  // Display admin name
+  try {
+    const admin = JSON.parse(adminInfo);
+    document.getElementById('adminName').textContent = `👤 ${admin.name}`;
+  } catch (e) {
+    console.error('Error parsing admin info:', e);
+  }
+
+  return true;
+}
+
+// Logout function
+function logout() {
+  if (confirm('Are you sure you want to logout?')) {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminInfo');
+    window.location.href = 'login.html';
+  }
+}
+
+// Check authentication on page load
+window.addEventListener('DOMContentLoaded', () => {
+  checkAuthentication();
+});
+
 const measurementGroups = {
   'Blouse Measurements': [
     { label: 'Length', key: 'blouse_length', min: 6, max: 25 },

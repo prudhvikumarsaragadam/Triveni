@@ -91,6 +91,34 @@ const initializeDatabase = () => {
       FOREIGN KEY(order_id) REFERENCES orders(id)
     )`);
 
+    // Admin table
+    db.run(`CREATE TABLE IF NOT EXISTS admins (
+      id TEXT PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      email TEXT UNIQUE,
+      name TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+      if (!err) {
+        // Check if default admin exists
+        db.get(`SELECT * FROM admins WHERE username = ?`, ['admin'], (err, row) => {
+          if (!row) {
+            // Insert default admin (password: Admin@123)
+            const crypto = require('crypto');
+            const defaultPassword = 'Admin@123';
+            db.run(`INSERT INTO admins (id, username, password, email, name) 
+                    VALUES (?, ?, ?, ?, ?)`,
+              ['admin-1', 'admin', defaultPassword, 'admin@triveni.com', 'Admin'],
+              (err) => {
+                if (!err) console.log('Default admin account created');
+              }
+            );
+          }
+        });
+      }
+    });
+
     console.log('Database tables initialized');
   });
 };

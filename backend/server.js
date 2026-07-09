@@ -22,12 +22,14 @@ app.use(express.static('public'));
 app.use('/uploads', express.static(uploadsDir));
 
 // Import routes
+const authRouter = require('./routes/auth');
 const ordersRouter = require('./routes/orders');
 const customersRouter = require('./routes/customers');
 const billsRouter = require('./routes/bills');
 const photosRouter = require('./routes/photos');
 
 // API Routes
+app.use('/api/auth', authRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/bills', billsRouter);
