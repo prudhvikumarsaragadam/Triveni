@@ -101,15 +101,15 @@ const initializeDatabase = () => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`, (err) => {
       if (!err) {
-        // Check if default admin exists
-        db.get(`SELECT * FROM admins WHERE username = ?`, ['admin'], (err, row) => {
+          // Check if default admin exists
+          const defaultUsername = process.env.ADMIN_USERNAME || 'admin';
+          const defaultPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
+          db.get(`SELECT * FROM admins WHERE username = ?`, [defaultUsername], (err, row) => {
           if (!row) {
-            // Insert default admin (password: Admin@123)
             const crypto = require('crypto');
-            const defaultPassword = 'Admin@123';
             db.run(`INSERT INTO admins (id, username, password, email, name) 
                     VALUES (?, ?, ?, ?, ?)`,
-              ['admin-1', 'admin', defaultPassword, 'admin@triveni.com', 'Admin'],
+            ['admin-1', defaultUsername, defaultPassword, 'admin@triveni.com', 'Admin'],
               (err) => {
                 if (!err) console.log('Default admin account created');
               }
