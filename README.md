@@ -5,7 +5,7 @@ A comprehensive web-based management system for tracking customer orders for sti
 ## Features
 
 ✨ **Order Management**
-- Create and track customer order
+- Create and track customer orders
 - Automatic bill generation with unique bill numbers
 - Timeline tracking (Booking → Cutting → Stitching → QC → Ready → Delivered)
 - Cutting deadline calculation and alerts
@@ -232,17 +232,6 @@ Update the timeline array in order display sections of `frontend/js/app.js`.
 2. Add form fields in `frontend/index.html`
 3. Update models in `backend/models/`
 4. Update API routes
-
-### Google Shared Drive Setup
-1. Create or use an existing Google Shared Drive in your Workspace account.
-2. Add the service account email `triveni@trivenifashionworld.iam.gserviceaccount.com` as a member with Editor access.
-3. In `backend/.env`, set:
-   - `GOOGLE_SHARED_DRIVE_ID` to the shared drive ID
-   - `GOOGLE_DRIVE_FOLDER_ID` to the folder ID inside that shared drive (or the shared drive root folder ID)
-4. Keep `GOOGLE_CLIENT_EMAIL` and `GOOGLE_PRIVATE_KEY` set for the service account.
-5. Restart the backend server.
-
-> Note: Service accounts cannot upload to normal My Drive folders without OAuth delegation. Use a Shared Drive ID instead.
 
 ### Integrate WhatsApp
 - Google integration ready in `backend/.env`

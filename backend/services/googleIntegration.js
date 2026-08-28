@@ -180,9 +180,9 @@ async function getOrCreateDriveFolder() {
       if (sharedDriveId) {
         console.warn('Configured Drive folder is not in a shared drive. Using configured shared drive ID instead.');
         driveFolderId = null;
-            } else {
-        console.warn('Configured Drive folder is not in a shared drive and no shared drive ID is configured. Creating a dedicated shared drive for uploads.');
-        driveFolderId = null;
+      } else {
+        console.warn('Configured Drive folder is not in a shared drive. A shared drive ID is required for service account uploads.');
+        return driveFolderId;
       }
     } catch (err) {
       console.warn('Provided Drive folder is not accessible, creating a new folder instead:', err.message);
@@ -464,9 +464,8 @@ async function uploadFileToDrive(localFilePath, originalName, mimeType) {
   const drive = await getDrive();
   const folderId = await getOrCreateDriveFolder();
   const folderMeta = await getDriveFolderMetadata(folderId);
-  const isSharedDrive = Boolean(folderMeta.driveId);
-  if (!isSharedDrive) {
-    console.warn('Uploading file to regular Drive folder rather than a shared drive.');
+  if (!folderMeta.driveId) {
+    throw new Error('Google Drive upload folder is not in a shared drive. Service accounts can only upload files to shared drives or via OAuth delegation.');
   }
 
   const fileMetadata = {

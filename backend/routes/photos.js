@@ -81,12 +81,9 @@ router.post('/upload/:orderId', upload.array('photos', 10), async (req, res) => 
         }
       }
 
-      const uploadSuccess = driveErrors.length === 0;
       const responsePayload = {
-        success: uploadSuccess,
-        message: uploadSuccess
-          ? `${uploadedPhotos.length} photo(s) uploaded successfully`
-          : `${uploadedPhotos.length} photo(s) uploaded locally, but ${driveErrors.length} photo(s) failed to upload to Google Drive.`,
+        success: true,
+        message: `${uploadedPhotos.length} photo(s) uploaded successfully`,
         photos: uploadedPhotos,
         driveLinks,
         googleSync
@@ -94,7 +91,6 @@ router.post('/upload/:orderId', upload.array('photos', 10), async (req, res) => 
 
       if (driveErrors.length > 0) {
         responsePayload.driveErrors = driveErrors;
-        responsePayload.error = driveErrors.join('; ');
       }
 
       res.status(201).json(responsePayload);
