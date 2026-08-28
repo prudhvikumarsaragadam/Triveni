@@ -2,6 +2,23 @@ const API_BASE_URL = window.location.hostname === 'localhost' || window.location
   ? 'http://localhost:5000/api'
   : `${window.location.origin}/api`;
 
+const parseResponse = async (response) => {
+  const body = await response.text();
+  let data;
+
+  try {
+    data = JSON.parse(body);
+  } catch (error) {
+    throw new Error(`API request failed (${response.status}): ${body.slice(0, 120)}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || data.message || `API request failed (${response.status})`);
+  }
+
+  return data;
+};
+
 // API Helper Functions
 const api = {
   // Customers
@@ -11,17 +28,17 @@ const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(customerData)
     });
-    return response.json();
+    return parseResponse(response);
   },
 
   getCustomers: async () => {
     const response = await fetch(`${API_BASE_URL}/customers`);
-    return response.json();
+    return parseResponse(response);
   },
 
   getCustomer: async (id) => {
     const response = await fetch(`${API_BASE_URL}/customers/${id}`);
-    return response.json();
+    return parseResponse(response);
   },
 
   // Orders
@@ -31,22 +48,22 @@ const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
     });
-    return response.json();
+    return parseResponse(response);
   },
 
   getOrders: async () => {
     const response = await fetch(`${API_BASE_URL}/orders`);
-    return response.json();
+    return parseResponse(response);
   },
 
   getOrder: async (id) => {
     const response = await fetch(`${API_BASE_URL}/orders/${id}`);
-    return response.json();
+    return parseResponse(response);
   },
 
   getOrderQueue: async () => {
     const response = await fetch(`${API_BASE_URL}/orders/queue/all`);
-    return response.json();
+    return parseResponse(response);
   },
 
   updateOrderStatus: async (id, status) => {
@@ -55,13 +72,13 @@ const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
     });
-    return response.json();
+    return parseResponse(response);
   },
 
   // Bills
   getBillByOrder: async (orderId) => {
     const response = await fetch(`${API_BASE_URL}/bills/order/${orderId}`);
-    return response.json();
+    return parseResponse(response);
   },
 
   updatePayment: async (billId, paidAmount, paymentStatus) => {
@@ -70,7 +87,7 @@ const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ paid_amount: paidAmount, payment_status: paymentStatus })
     });
-    return response.json();
+    return parseResponse(response);
   },
 
   // Photos
@@ -84,12 +101,12 @@ const api = {
       method: 'POST',
       body: formData
     });
-    return response.json();
+    return parseResponse(response);
   },
 
   getOrderPhotos: async (orderId) => {
     const response = await fetch(`${API_BASE_URL}/photos/order/${orderId}`);
-    return response.json();
+    return parseResponse(response);
   },
 
   deletePhoto: async (photoId) => {
