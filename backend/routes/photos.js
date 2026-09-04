@@ -6,11 +6,14 @@ const util = require('util');
 const Photo = require('../models/Photo');
 const Order = require('../models/Order');
 const googleIntegration = require('../services/googleIntegration');
+const uploadsDir = process.env.VERCEL
+  ? path.join('/tmp', 'uploads')
+  : path.join(__dirname, '../uploads');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads/'));
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -60,7 +63,7 @@ router.post('/upload/:orderId', upload.array('photos', 10), async (req, res) => 
       });
 
       try {
-        const localFilePath = path.join(__dirname, '../uploads', file.filename);
+        const localFilePath = path.join(uploadsDir, file.filename);
         const uploadedFile = await googleIntegration.uploadFileToDrive(localFilePath, file.originalname, file.mimetype);
         driveLinks.push(uploadedFile.webViewLink || uploadedFile.webContentLink);
       } catch (driveError) {
