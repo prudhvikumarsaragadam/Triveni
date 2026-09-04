@@ -1,8 +1,9 @@
 const isLocalFrontend = window.location.protocol === 'file:' ||
   ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
     window.location.port !== '5000');
-const API_BASE_URL = isLocalFrontend ? 'http://localhost:5000/api' : '/api';
-const API_ORIGIN = isLocalFrontend ? 'http://localhost:5000' : '';
+const productionApiOrigin = 'https://triveni-ddb4302-vercel.vercel.app';
+const API_BASE_URL = isLocalFrontend ? 'http://localhost:5000/api' : `${productionApiOrigin}/api`;
+const API_ORIGIN = isLocalFrontend ? 'http://localhost:5000' : productionApiOrigin;
 window.APP_API_BASE_URL = API_BASE_URL;
 window.APP_API_ORIGIN = API_ORIGIN;
 
