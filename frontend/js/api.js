@@ -1,4 +1,9 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const isLocalFrontend = window.location.protocol === 'file:' ||
+  (window.location.hostname === 'localhost' && window.location.port === '3001');
+const API_BASE_URL = isLocalFrontend ? 'http://localhost:5000/api' : '/api';
+const API_ORIGIN = isLocalFrontend ? 'http://localhost:5000' : '';
+window.APP_API_BASE_URL = API_BASE_URL;
+window.APP_API_ORIGIN = API_ORIGIN;
 
 // API Helper Functions
 const api = {

@@ -297,7 +297,7 @@ function openPhotoModal(photoPath) {
   if (photoPath.startsWith('http') || photoPath.startsWith('data:')) {
     modalPhoto.src = photoPath;
   } else {
-    modalPhoto.src = `http://localhost:5000${photoPath}`;
+    modalPhoto.src = `${window.APP_API_ORIGIN}${photoPath}`;
   }
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -497,7 +497,7 @@ async function loadAllOrders() {
     const ordersHtml = orders.map(order => {
       const photoItems = (order.photos || []).map(photo => `
         <div class="order-photo-item">
-          <img src="http://localhost:5000${photo}" alt="Order photo" onclick="openPhotoModal('${photo}')">
+          <img src="${window.APP_API_ORIGIN}${photo}" alt="Order photo" onclick="openPhotoModal('${photo}')">
         </div>
       `).join('');
 
