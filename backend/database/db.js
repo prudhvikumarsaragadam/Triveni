@@ -1,7 +1,10 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const dbPath = process.env.DB_PATH || path.join(__dirname, 'boutique.db');
+const defaultDbPath = process.env.VERCEL
+  ? path.join('/tmp', 'boutique.db')
+  : path.join(__dirname, 'boutique.db');
+const dbPath = process.env.DB_PATH || defaultDbPath;
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) console.error('Database connection error:', err);
   else if (!process.env.JEST_WORKER_ID) console.log('Connected to SQLite database:', dbPath);
